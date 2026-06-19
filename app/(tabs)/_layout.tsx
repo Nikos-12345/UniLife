@@ -1,34 +1,61 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
-    <Tabs
+    <Tabs 
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
+        tabBarStyle: { backgroundColor: '#1e293b', borderTopColor: '#334155' },
+        tabBarActiveTintColor: '#38bdf8',
+        tabBarInactiveTintColor: '#94a3b8',
+      }}
+    >
+      <Tabs.Screen 
+        name="index" 
+        options={{ 
+          title: 'Αρχική',
+          tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />
+        }} 
       />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
+      <Tabs.Screen 
+        name="assignments" 
+        options={{ 
+          title: 'Εργασίες',
+          tabBarIcon: ({ color, size }) => <Ionicons name="document-text" size={size} color={color} />
+        }} 
+      />
+      <Tabs.Screen 
+        name="notes" 
+        options={{ 
+          title: 'Σημειώσεις',
+          tabBarIcon: ({ color, size }) => <Ionicons name="book" size={size} color={color} />
+        }} 
+      />
+      
+      <Tabs.Screen 
+        name="exams" 
+        options={{ 
+          title: 'Εξετάσεις',
+          tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />
+        }} 
+      />
+
+      <Tabs.Screen 
+        name="grades" 
+        options={{ 
+          title: 'Βαθμολογίες',
+          tabBarIcon: ({ color, size }) => <Ionicons name="bar-chart" size={size} color={color} />
+        }} 
+      />
+      
+      {/* Κρυφή οθόνη Auth χωρίς μενού */}
+      <Tabs.Screen 
+        name="auth" 
+        options={{ 
+          href: null, 
+          tabBarStyle: { display: 'none' } 
+        }} 
       />
     </Tabs>
   );
