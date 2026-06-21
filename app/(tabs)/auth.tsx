@@ -24,7 +24,7 @@ export default function AuthScreen() {
     if (!isLoginMode) {
       // --- REGISTER MODE ---
       try {
-        const response = await fetch('http://172.16.0.65:5000/api/auth/register', {
+        const response = await fetch('https://unilife-backend-4xjo.onrender.com/api/auth/register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -52,7 +52,7 @@ export default function AuthScreen() {
     } else {
       // --- LOGIN MODE ---
       try {
-        const response = await fetch('http://172.16.0.65:5000/api/auth/login', {
+        const response = await fetch('https://unilife-backend-4xjo.onrender.com/api/auth/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

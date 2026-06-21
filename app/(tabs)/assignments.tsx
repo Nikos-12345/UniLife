@@ -23,7 +23,7 @@ export default function AssignmentsScreen() {
 
   const fetchAssignments = async (uid: number) => {
     try {
-      const response = await fetch(`http://172.16.0.65:5000/api/dashboard/${uid}`);
+      const response = await fetch(`http://:5000/api/dashboard/${uid}`);
       const data = await response.json();
       if (response.ok) setAssignments(data.assignments);
     } catch (error) { console.error(error); }
@@ -47,7 +47,7 @@ export default function AssignmentsScreen() {
   const handleAddAssignment = async () => {
     if (!newTitle.trim() || !dateString) return alert('Συμπλήρωσε τίτλο και ημερομηνία!');
     try {
-      const response = await fetch('http://172.16.0.65:5000/api/assignments', {
+      const response = await fetch('https://unilife-backend-4xjo.onrender.com/api/assignments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, title: newTitle, description: newDesc, due_date: dateString, priority }),
@@ -66,7 +66,7 @@ export default function AssignmentsScreen() {
       { text: "Ακύρωση", style: "cancel" },
       { text: "Διαγραφή", style: "destructive", onPress: async () => {
           try {
-            const response = await fetch(`http://172.16.0.65:5000/api/assignments/${id}`, { method: 'DELETE' });
+            const response = await fetch(`https://unilife-backend-4xjo.onrender.com/api/assignments/${id}`, { method: 'DELETE' });
             if (response.ok && userId) fetchAssignments(userId);
           } catch (error) { alert('Σφάλμα διαγραφής'); }
         }

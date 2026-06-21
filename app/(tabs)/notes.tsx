@@ -17,7 +17,7 @@ export default function NotesScreen() {
 
   const fetchNotes = async (uid: number) => {
     try {
-      const response = await fetch(`http://172.16.0.65:5000/api/notes/${uid}`);
+      const response = await fetch(`https://unilife-backend-4xjo.onrender.com/api/notes/${uid}`);
       const data = await response.json();
       if (response.ok) setNotes(data);
     } catch (error) {
@@ -48,7 +48,7 @@ export default function NotesScreen() {
       return;
     }
     try {
-      const response = await fetch('http://172.16.0.65:5000/api/notes', {
+      const response = await fetch('https://unilife-backend-4xjo.onrender.com/api/notes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, title: newTitle, content: newContent, priority }),
@@ -66,7 +66,7 @@ export default function NotesScreen() {
       { text: "Ακύρωση", style: "cancel" },
       { text: "Διαγραφή", style: "destructive", onPress: async () => {
           try {
-            const response = await fetch(`http://172.16.0.65:5000/api/notes/${id}`, { method: 'DELETE' });
+            const response = await fetch(`https://unilife-backend-4xjo.onrender.com/api/notes/${id}`, { method: 'DELETE' });
             if (response.ok && userId) fetchNotes(userId);
           } catch (error) { alert('Σφάλμα διαγραφής'); }
         }

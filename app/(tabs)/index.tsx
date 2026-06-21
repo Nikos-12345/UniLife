@@ -20,8 +20,8 @@ export default function Dashboard() {
           const user = JSON.parse(userDataString);
           
           const [dashRes, gradesRes] = await Promise.all([
-            fetch(`http://172.16.0.65:5000/api/dashboard/${user.id}`),
-            fetch(`http://172.16.0.65:5000/api/grades/${user.id}`)
+            fetch(`https://unilife-backend-4xjo.onrender.com/api/dashboard/${user.id}`),
+            fetch(`https://unilife-backend-4xjo.onrender.com/api/grades/${user.id}`)
           ]);
           
           const dashData = await dashRes.json();
