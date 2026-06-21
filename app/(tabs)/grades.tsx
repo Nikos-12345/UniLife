@@ -32,7 +32,12 @@ export default function GradesScreen() {
 
   // Υπολογισμός Σταθμισμένου Μέσου Όρου
   const calculateAverage = (gradesArray: any[]) => {
-    const validGrades = gradesArray.filter((g) => g.grade !== null && g.grade !== '');
+    const validGrades = gradesArray.filter((g) => {
+      if (g.grade === null || g.grade === undefined || g.grade === '') return false;
+      const gradeVal = parseFloat(g.grade);
+      return !isNaN(gradeVal) && gradeVal >= 5;
+    });
+
     if (validGrades.length === 0) return '-';
 
     let totalPoints = 0;
@@ -41,8 +46,9 @@ export default function GradesScreen() {
     validGrades.forEach((g) => {
       const gradeVal = parseFloat(g.grade);
       const ectsVal = parseInt(g.ects, 10);
+
       if (!isNaN(gradeVal) && !isNaN(ectsVal)) {
-        totalPoints += gradeVal * ectsVal;
+        totalPoints += gradeVal *ectsVal;
         totalEcts += ectsVal;
       }
     });
