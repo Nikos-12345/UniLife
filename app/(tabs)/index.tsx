@@ -68,12 +68,13 @@ export default function Dashboard() {
     return totalEcts === 0 ? "0.00" : (totalPoints / totalEcts).toFixed(2);
   };
 
-  // 3. Υπολογισμός Δεδομένων για το Ιστόγραμμα (Μ.Ο. ανά Εξάμηνο)
+  // 3. Δημιουργία Δεδομένων για τα 8 Εξάμηνα (Αλφαβητικά)
   const getSemesterChartData = () => {
+    // Αρχικά, αθροίζουμε τα δεδομένα ανά εξάμηνο
     const semesterStats: { [key: string]: { points: number, ects: number } } = {};
 
     validPassedGrades.forEach(g => {
-      const sem = g.semester;
+      const sem = String(g.semester);
       const gradeVal = parseFloat(g.grade);
       const ectsVal = parseInt(g.ects, 10);
       
@@ -86,13 +87,17 @@ export default function Dashboard() {
       }
     });
 
-    // Δημιουργία πίνακα δεδομένων και ταξινόμηση ανά εξάμηνο
-    return Object.keys(semesterStats)
-      .map(sem => ({
-        semester: sem,
-        average: semesterStats[sem].points / semesterStats[sem].ects
-      }))
-      .sort((a, b) => parseInt(a.semester) - parseInt(b.semester));
+    // Δημιουργούμε έναν σταθερό πίνακα με τα 8 εξάμηνα (Α έως Η)
+    const greekSemesters = ['Α', 'Β', 'Γ', 'Δ', 'Ε', 'ΣΤ', 'Ζ', 'Η'];
+    
+    return greekSemesters.map((letter, index) => {
+      const semNum = String(index + 1); // "1", "2", ... "8"
+      const stats = semesterStats[semNum];
+      return {
+        label: letter,
+        average: stats ? (stats.points / stats.ects) : 0 // Αν δεν έχει περασμένα, average = 0
+      };
+    });
   };
 
   const chartData = getSemesterChartData();
@@ -130,27 +135,14 @@ export default function Dashboard() {
         </View>
       </View>
 
-      {/* ΝΕΟ: Ιστόγραμμα Μέσου Όρου ανά Εξάμηνο */}
-      {chartData.length > 0 && (
-        <View style={styles.chartCard}>
-          <Text style={styles.chartTitle}>📊 Επιδόσεις ανά Εξάμηνο</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chartContainer}>
-            {chartData.map((data, index) => {
-              // Υπολογισμός ύψους μπάρας (max 100% για το 10)
-              const barHeight = (data.average / 10) * 100; 
-              return (
-                <View key={index} style={styles.barWrapper}>
-                  <Text style={styles.barValue}>{data.average.toFixed(2)}</Text>
-                  <View style={styles.barBackground}>
-                    <View style={[styles.barFill, { height: `${barHeight}%` }]} />
-                  </View>
-                  <Text style={styles.barLabel}>{data.semester}ο</Text>
-                </View>
-              );
-            })}
-          </ScrollView>
+      <Text style={styles.sectionTitle}>📅 Επόμενες Εξετάσεις</Text>
+      {exams.map((e) => (
+        <View key={e.id} style={styles.card}>
+          <Text style={styles.cardTitle}>🎓 Μάθημα</Text>
+          <Text style={styles.cardContent}>{e.course_name}</Text>
+          <Text style={styles.cardSubContent}>Ημερομηνία: {formatDate(e.exam_date)}</Text>
         </View>
-      )}
+      ))}
       
       <Text style={styles.sectionTitle}>📝 Επόμενες Εργασίες</Text>
       {assignments.map((a) => (
@@ -161,14 +153,41 @@ export default function Dashboard() {
         </View>
       ))}
 
-      <Text style={styles.sectionTitle}>📅 Επόμενες Εξετάσεις</Text>
-      {exams.map((e) => (
-        <View key={e.id} style={styles.card}>
-          <Text style={styles.cardTitle}>🎓 Μάθημα</Text>
-          <Text style={styles.cardContent}>{e.course_name}</Text>
-          <Text style={styles.cardSubContent}>Ημερομηνία: {formatDate(e.exam_date)}</Text>
+      {/* ΝΕΟ: Επαγγελματικό Ιστόγραμμα (8 Εξάμηνα με Y-Axis) */}
+      <View style={styles.chartCard}>
+        <Text style={styles.chartTitle}>📊 Επιδόσεις ανά Εξάμηνο</Text>
+        
+        <View style={styles.chartWrapper}>
+          {/* Κάθετος Άξονας (Y-Axis) */}
+          <View style={styles.yAxis}>
+            {[10, 8, 6, 4, 2, 0].map((val) => (
+              <Text key={val} style={styles.yAxisText}>{val}</Text>
+            ))}
+          </View>
+
+          {/* Μπάρες Γραφήματος */}
+          <View style={styles.barsContainer}>
+            {chartData.map((data, index) => {
+              const barHeight = (data.average / 10) * 100; 
+              return (
+                <View key={index} style={styles.barColumn}>
+                  {/* Εμφάνιση βαθμού πάνω από τη μπάρα μόνο αν είναι > 0 */}
+                  <Text style={styles.barValueText}>
+                    {data.average > 0 ? data.average.toFixed(1) : ''}
+                  </Text>
+                  
+                  <View style={styles.barBackground}>
+                    <View style={[styles.barFill, { height: `${barHeight}%` }]} />
+                  </View>
+                  
+                  <Text style={styles.barLabel}>{data.label}</Text>
+                </View>
+              );
+            })}
+          </View>
         </View>
-      ))}
+      </View>
+
       <View style={{ height: 40 }} />
     </ScrollView>
   );
@@ -190,15 +209,18 @@ const styles = StyleSheet.create({
   statLabel: { color: '#94a3b8', fontSize: 12 },
   statValue: { color: '#fff', fontSize: 24, fontWeight: 'bold' },
   
-  // Νέα Styles για το Ιστόγραμμα
-  chartCard: { backgroundColor: '#1e293b', borderRadius: 15, padding: 20, marginBottom: 20, elevation: 3 },
-  chartTitle: { fontSize: 16, fontWeight: 'bold', color: '#f8fafc', marginBottom: 20 },
-  chartContainer: { flexDirection: 'row', alignItems: 'flex-end', paddingBottom: 10 },
-  barWrapper: { alignItems: 'center', marginRight: 25, width: 40 },
-  barValue: { color: '#a855f7', fontSize: 13, fontWeight: 'bold', marginBottom: 8 },
-  barBackground: { height: 120, width: 28, backgroundColor: '#0f172a', borderRadius: 14, justifyContent: 'flex-end', overflow: 'hidden' },
-  barFill: { width: '100%', backgroundColor: '#a855f7', borderRadius: 14 },
-  barLabel: { color: '#94a3b8', fontSize: 14, marginTop: 10, fontWeight: 'bold' },
+  // Νέα Styles για το Αναβαθμισμένο Ιστόγραμμα
+  chartCard: { backgroundColor: '#1e293b', borderRadius: 15, padding: 15, marginBottom: 20, elevation: 3 },
+  chartTitle: { fontSize: 16, fontWeight: 'bold', color: '#f8fafc', marginBottom: 20, paddingLeft: 5 },
+  chartWrapper: { flexDirection: 'row', height: 180 }, // Ορίζει το ύψος όλου του γραφήματος
+  yAxis: { justifyContent: 'space-between', paddingBottom: 25, paddingRight: 10, alignItems: 'flex-end', borderRightWidth: 1, borderColor: '#334155' },
+  yAxisText: { color: '#64748b', fontSize: 12, fontWeight: 'bold' },
+  barsContainer: { flex: 1, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'flex-end' },
+  barColumn: { alignItems: 'center', width: 28 },
+  barValueText: { color: '#a855f7', fontSize: 10, fontWeight: 'bold', marginBottom: 4, height: 14 },
+  barBackground: { height: 130, width: 20, backgroundColor: '#0f172a', borderRadius: 10, justifyContent: 'flex-end', overflow: 'hidden' },
+  barFill: { width: '100%', backgroundColor: '#a855f7', borderRadius: 10 },
+  barLabel: { color: '#94a3b8', fontSize: 12, marginTop: 8, fontWeight: 'bold', height: 16 },
 
   sectionTitle: { fontSize: 20, fontWeight: 'bold', color: '#38bdf8', marginTop: 15, marginBottom: 10 },
   card: { backgroundColor: '#1e293b', borderRadius: 12, padding: 15, marginBottom: 15, elevation: 3 },
