@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   cardContent: { fontSize: 15, color: '#cbd5e1', marginBottom: 12 },
   footerInfo: { borderTopWidth: 1, borderTopColor: '#334155', paddingTop: 10 },
   cardSubContent: { fontSize: 13, color: '#94a3b8' },
-  emptyCard: { backgroundColor: '#1e293b', borderRadius: 12, padding: 25, alignItems: 'center' },
+  emptyCard: { backgroundColor: '#1e293b', borderRadius: 12, padding: 20, alignItems: 'center', marginTop: 20 },
   emptyText: { fontSize: 16, color: '#94a3b8' },
   fab: { position: 'absolute', width: 60, height: 60, alignItems: 'center', justifyContent: 'center', right: 20, bottom: 20, backgroundColor: '#a855f7', borderRadius: 30, elevation: 8 },
   modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.6)' },

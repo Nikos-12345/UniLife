@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 18, fontWeight: 'bold', color: '#f8fafc', marginBottom: 5 },
   cardContent: { fontSize: 15, color: '#cbd5e1', marginBottom: 10 },
   cardSubContent: { fontSize: 14, fontWeight: 'bold' },
-  emptyText: { fontSize: 16, color: '#94a3b8', textAlign: 'center', marginTop: 40 },
+  emptyText: { fontSize: 16, color: '#94a3b8', backgroundColor: '#1e293b', borderRadius: 12, padding: 20, textAlign: 'center', marginTop: 20 },
   fab: { position: 'absolute', width: 60, height: 60, alignItems: 'center', justifyContent: 'center', right: 20, bottom: 20, backgroundColor: '#38bdf8', borderRadius: 30, elevation: 8 },
   modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.6)' },
   modalContainer: { backgroundColor: '#1e293b', padding: 25, borderTopLeftRadius: 20, borderTopRightRadius: 20 },

@@ -8,7 +8,6 @@ export default function GradesScreen() {
   const [grades, setGrades] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  // States για το Modal (Φόρμα)
   const [modalVisible, setModalVisible] = useState(false);
   const [newGrade, setNewGrade] = useState({ course_name: '', grade: '', semester: '', ects: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,7 +29,6 @@ export default function GradesScreen() {
 
   useFocusEffect(useCallback(() => { fetchGrades(); }, []));
 
-  // Υπολογισμός Σταθμισμένου Μέσου Όρου
   const calculateAverage = (gradesArray: any[]) => {
     const validGrades = gradesArray.filter((g) => {
       if (g.grade === null || g.grade === undefined || g.grade === '') return false;
@@ -46,9 +44,8 @@ export default function GradesScreen() {
     validGrades.forEach((g) => {
       const gradeVal = parseFloat(g.grade);
       const ectsVal = parseInt(g.ects, 10);
-
       if (!isNaN(gradeVal) && !isNaN(ectsVal)) {
-        totalPoints += gradeVal *ectsVal;
+        totalPoints += gradeVal * ectsVal;
         totalEcts += ectsVal;
       }
     });
@@ -56,19 +53,23 @@ export default function GradesScreen() {
     return totalEcts === 0 ? '-' : (totalPoints / totalEcts).toFixed(2);
   };
 
-  // Μέτρηση Περασμένων Μαθημάτων
   const passedCoursesCount = grades.filter((g) => {
     const val = parseFloat(g.grade);
     return !isNaN(val) && val >= 5;
   }).length;
 
-  // Ομαδοποίηση ανά Εξάμηνο
   const semesters = grades.reduce((acc: any, grade: any) => {
     (acc[grade.semester] = acc[grade.semester] || []).push(grade);
     return acc;
   }, {});
 
-  // Αποθήκευση Νέου Βαθμού
+  const formatGradeDisplay = (gradeValue: any) => {
+    if (gradeValue === null || gradeValue === undefined || gradeValue === '') return '-';
+    const num = parseFloat(gradeValue);
+    if (isNaN(num)) return '-';
+    return Number.isInteger(num) ? num.toString() : num.toFixed(1);
+  };
+
   const handleSaveGrade = async () => {
     if (!newGrade.course_name || !newGrade.semester || !newGrade.ects) {
       Alert.alert('Προσοχή', 'Συμπλήρωσε όνομα, εξάμηνο και ECTS!');
@@ -95,12 +96,11 @@ export default function GradesScreen() {
       if (response.ok) {
         setModalVisible(false);
         setNewGrade({ course_name: '', grade: '', semester: '', ects: '' });
-        fetchGrades(); // Ανανέωση της λίστας
+        fetchGrades(); 
       } else {
         Alert.alert('Σφάλμα', 'Αποτυχία αποθήκευσης.');
       }
     } catch (error) {
-      console.error(error);
       Alert.alert('Σφάλμα', 'Πρόβλημα σύνδεσης με τον server.');
     } finally {
       setIsSubmitting(false);
@@ -112,7 +112,7 @@ export default function GradesScreen() {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={{ padding: 20 }}>
-        {/* Header με Κουμπί Προσθήκης */}
+        
         <View style={styles.headerRow}>
           <Text style={styles.mainTitle}>Βαθμολογίες</Text>
           <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.addButton}>
@@ -120,7 +120,6 @@ export default function GradesScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Στατιστικά */}
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
             <Text style={styles.statLabel}>Περασμένα</Text>
@@ -132,59 +131,67 @@ export default function GradesScreen() {
           </View>
         </View>
         
-        {/* Λίστα ανά Εξάμηνο */}
         {Object.keys(semesters).sort().map((sem) => {
           const semGrades = semesters[sem];
           return (
-            <View key={sem} style={styles.semContainer}>
+            <View key={sem} style={styles.semesterCard}>
               <View style={styles.semHeader}>
                 <Text style={styles.semTitle}>{sem}ο Εξάμηνο</Text>
                 <View style={styles.semAvgBadge}>
-                  <Text style={styles.semAvgText}>Μ.Ο: {calculateAverage(semGrades)}</Text>
+                  <Text style={styles.semAvgText}>Μ.Ο Εξαμήνου: {calculateAverage(semGrades)}</Text>
                 </View>
               </View>
-              {semGrades.map((g: any) => (
-                <View key={g.id} style={styles.gradeCard}>
-                  <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
-                    <Ionicons name={g.grade && parseFloat(g.grade) >= 5 ? "checkmark-circle" : "ellipse-outline"} size={20} color={g.grade && parseFloat(g.grade) >= 5 ? "#22c55e" : "#64748b"} style={{marginRight: 10}} />
-                    <View>
-                      <Text style={styles.courseName}>{g.course_name}</Text>
-                      <Text style={styles.ectsText}>{g.ects} ECTS</Text>
+
+              {semGrades.map((g: any, index: number) => {
+                const isPassed = g.grade && parseFloat(g.grade) >= 5;
+                const isLastItem = index === semGrades.length - 1;
+
+                return (
+                  <View key={g.id} style={[styles.gradeRow, isLastItem && styles.noBottomBorder]}>
+                    
+                    {/* Αριστερό Κουτί: Εικονίδιο + Κείμενο (Αυτό είναι το "Κόκκινο Border" σου) */}
+                    <View style={styles.leftBox}>
+                      <Ionicons 
+                        name={isPassed ? "checkmark-circle" : "ellipse-outline"} 
+                        size={22} 
+                        color={isPassed ? "#22c55e" : "#475569"} 
+                        style={{marginRight: 12, marginTop: 2}} 
+                      />
+                      <View style={styles.textWrapper}>
+                        <Text style={styles.courseName} numberOfLines={1} ellipsizeMode="tail">
+                          {g.course_name}
+                        </Text>
+                        <Text style={styles.ectsText}>{g.ects} ECTS</Text>
+                      </View>
                     </View>
+
+                    {/* Δεξί Κουτί: Μόνο ο Βαθμός (Αυτό είναι το "Γαλάζιο Border" σου) */}
+                    <View style={styles.rightBox}>
+                      <Text style={[styles.gradeText, { color: isPassed ? '#fbbf24' : (g.grade ? '#ef4444' : '#64748b') }]}>
+                        {formatGradeDisplay(g.grade)}
+                      </Text>
+                    </View>
+
                   </View>
-                  <Text style={[styles.gradeText, { color: g.grade && parseFloat(g.grade) < 5 ? '#ef4444' : '#fbbf24' }]}>
-                    {g.grade ? g.grade : '-'}
-                  </Text>
-                </View>
-              ))}
+                );
+              })}
             </View>
           );
         })}
       </ScrollView>
 
-      {/* Αναδυόμενο Παράθυρο Προσθήκης */}
       <Modal visible={modalVisible} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Νέα Βαθμολογία</Text>
 
             <Text style={styles.inputLabel}>Όνομα Μαθήματος</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="π.χ. Βάσεις Δεδομένων"
-              placeholderTextColor="#64748b"
-              value={newGrade.course_name}
-              onChangeText={(t) => setNewGrade({...newGrade, course_name: t})}
-            />
+            <TextInput style={styles.input} placeholder="π.χ. Βάσεις Δεδομένων" placeholderTextColor="#64748b" value={newGrade.course_name} onChangeText={(t) => setNewGrade({...newGrade, course_name: t})} />
 
             <Text style={styles.inputLabel}>Εξάμηνο</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.semesterChips}>
               {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
-                <TouchableOpacity 
-                  key={num} 
-                  style={[styles.chip, newGrade.semester === String(num) && styles.chipActive]}
-                  onPress={() => setNewGrade({...newGrade, semester: String(num)})}
-                >
+                <TouchableOpacity key={num} style={[styles.chip, newGrade.semester === String(num) && styles.chipActive]} onPress={() => setNewGrade({...newGrade, semester: String(num)})}>
                   <Text style={[styles.chipText, newGrade.semester === String(num) && styles.chipTextActive]}>{num}</Text>
                 </TouchableOpacity>
               ))}
@@ -193,35 +200,17 @@ export default function GradesScreen() {
             <View style={styles.rowInputs}>
               <View style={{flex: 1, marginRight: 10}}>
                 <Text style={styles.inputLabel}>ECTS</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="π.χ. 5"
-                  placeholderTextColor="#64748b"
-                  keyboardType="numeric"
-                  value={newGrade.ects}
-                  onChangeText={(t) => setNewGrade({...newGrade, ects: t})}
-                />
+                <TextInput style={styles.input} placeholder="π.χ. 5" placeholderTextColor="#64748b" keyboardType="numeric" value={newGrade.ects} onChangeText={(t) => setNewGrade({...newGrade, ects: t})} />
               </View>
               <View style={{flex: 1}}>
                 <Text style={styles.inputLabel}>Βαθμός (Προαιρετικό)</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="π.χ. 8.5"
-                  placeholderTextColor="#64748b"
-                  keyboardType="numeric"
-                  value={newGrade.grade}
-                  onChangeText={(t) => setNewGrade({...newGrade, grade: t})}
-                />
+                <TextInput style={styles.input} placeholder="π.χ. 8.5" placeholderTextColor="#64748b" keyboardType="numeric" value={newGrade.grade} onChangeText={(t) => setNewGrade({...newGrade, grade: t})} />
               </View>
             </View>
 
             <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => setModalVisible(false)}>
-                <Text style={styles.cancelBtnText}>Ακύρωση</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.saveBtn} onPress={handleSaveGrade} disabled={isSubmitting}>
-                <Text style={styles.saveBtnText}>{isSubmitting ? 'Αποθήκευση...' : 'Προσθήκη'}</Text>
-              </TouchableOpacity>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => setModalVisible(false)}><Text style={styles.cancelBtnText}>Ακύρωση</Text></TouchableOpacity>
+              <TouchableOpacity style={styles.saveBtn} onPress={handleSaveGrade} disabled={isSubmitting}><Text style={styles.saveBtnText}>{isSubmitting ? 'Αποθήκευση...' : 'Προσθήκη'}</Text></TouchableOpacity>
             </View>
           </View>
         </View>
@@ -235,19 +224,45 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, marginTop: 40 },
   mainTitle: { fontSize: 32, fontWeight: 'bold', color: '#f8fafc' },
   addButton: { backgroundColor: '#a855f7', width: 45, height: 45, borderRadius: 25, justifyContent: 'center', alignItems: 'center', elevation: 5 },
-  statsContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 30 },
-  statCard: { backgroundColor: '#1e293b', flex: 1, marginHorizontal: 5, padding: 15, borderRadius: 12, alignItems: 'center' },
+  statsContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 25 },
+  statCard: { backgroundColor: '#1e293b', flex: 1, marginHorizontal: 5, padding: 10, borderRadius: 12, alignItems: 'center' },
   statLabel: { color: '#94a3b8', fontSize: 14, marginBottom: 5 },
   statValue: { color: '#a855f7', fontSize: 24, fontWeight: 'bold' },
-  semContainer: { marginBottom: 25 },
-  semHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, paddingHorizontal: 5 },
-  semTitle: { fontSize: 20, fontWeight: 'bold', color: '#a855f7' },
+  
+  semesterCard: { backgroundColor: '#1e293b', borderRadius: 16, padding: 20, marginBottom: 25, elevation: 4 },
+  semHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: '#334155' },
+  semTitle: { fontSize: 18, fontWeight: 'bold', color: '#a855f7' },
   semAvgBadge: { backgroundColor: '#334155', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
   semAvgText: { color: '#cbd5e1', fontSize: 12, fontWeight: 'bold' },
-  gradeCard: { backgroundColor: '#1e293b', padding: 15, borderRadius: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  courseName: { color: '#f8fafc', fontSize: 16, fontWeight: '500' },
-  ectsText: { color: '#64748b', fontSize: 12, marginTop: 2 },
-  gradeText: { fontSize: 18, fontWeight: 'bold' },
+  
+  gradeRow: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    paddingVertical: 14, 
+    borderBottomWidth: 1, 
+    borderBottomColor: '#334155' 
+  },
+  noBottomBorder: { borderBottomWidth: 0, paddingBottom: 0 },
+  
+  leftBox: { 
+    flex: 1, 
+    flexDirection: 'row', 
+    alignItems: 'flex-start', 
+    marginRight: 20 
+  },
+  textWrapper: { 
+    flex: 1 
+  },
+  rightBox: {
+    width: 45, 
+    alignItems: 'flex-end', 
+  },
+
+  courseName: { color: '#f8fafc', fontSize: 15, fontWeight: '500', lineHeight: 20 },
+  ectsText: { color: '#64748b', fontSize: 12, marginTop: 4 },
+  gradeText: { fontSize: 20, fontWeight: 'bold' },
+  
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: 20 },
   modalContent: { backgroundColor: '#1e293b', borderRadius: 16, padding: 20, elevation: 10 },
   modalTitle: { fontSize: 22, fontWeight: 'bold', color: '#f8fafc', marginBottom: 20, textAlign: 'center' },
